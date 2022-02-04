@@ -53,8 +53,11 @@ describe('TreeRepository', () => {
     })
   })
 
+  afterAll(async () => {
+    await postgresContainer.stop()
+  })
+
   describe('#findRoots()', () => {
-    console.log('test')
     let connection: Connection
     let nodeRepo: NodeRepository
 
@@ -70,6 +73,10 @@ describe('TreeRepository', () => {
         },
         { value: 2 },
       ])
+    })
+
+    afterAll(async () => {
+      await connection.close()
     })
 
     it('returns entities that have no ancestors', async () => {
