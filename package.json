@@ -4,7 +4,7 @@
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest test"
   },
   "keywords": [
     "typeorm",
