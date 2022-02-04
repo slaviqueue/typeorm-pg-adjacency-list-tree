@@ -1,11 +1,6 @@
 import { FindTreeOptions } from 'typeorm/find-options/FindTreeOptions'
 
-export interface BaseTreeEntity {
-  id: number
-  parentId: number
-}
-
-export declare class ITreeRepository<Entity extends BaseTreeEntity> {
+export declare class ITreeRepository<Entity> {
   /**
    * Gets complete trees for all roots in the table.
    */

@@ -2,12 +2,14 @@ import { keyBy, map } from 'lodash'
 import { In, Repository } from 'typeorm'
 import { FindTreeOptions } from 'typeorm/find-options/FindTreeOptions'
 import { childrenPropertyMetadataArgs } from '../constant/decorator-constants'
-import { BaseTreeEntity, ITreeRepository } from './tree-repository.interface'
+import { ITreeRepository } from './tree-repository.interface'
 
-export class TreeRepository<Entity extends BaseTreeEntity>
-  extends Repository<Entity>
-  implements ITreeRepository<Entity>
-{
+export interface IBaseTreeEntity {
+  id: number
+  parentId: number
+}
+
+export class TreeRepository<Entity> extends Repository<Entity> implements ITreeRepository<Entity> {
   public async findTrees(options?: FindTreeOptions) {
     const roots = await this.findRoots(options)
     const trees = await Promise.all(roots.map((root) => this.findDescendantsTree(root, options)))
@@ -19,11 +21,12 @@ export class TreeRepository<Entity extends BaseTreeEntity>
   }
 
   public async findDescendants(root: Entity, options?: FindTreeOptions) {
+    const rootAsTreeEntity = root as unknown as IBaseTreeEntity
     const rawNodes = await this.manager.query(`
       WITH RECURSIVE r AS (
         SELECT id, 0 as depth
         FROM ${this.metadata.tablePath}
-        WHERE id = ${root.id}
+        WHERE id = ${rootAsTreeEntity.id}
 
         UNION
 
@@ -46,7 +49,8 @@ export class TreeRepository<Entity extends BaseTreeEntity>
 
   public async findDescendantsTree(root: Entity, options?: FindTreeOptions) {
     const nodes = await this.findDescendants(root, options)
-    const assembledTreeNodes = this._assembleOrgTreeNodes(nodes, root.id)
+    const rootAsTreeEntity = root as unknown as IBaseTreeEntity
+    const assembledTreeNodes = this._assembleOrgTreeNodes(nodes, rootAsTreeEntity.id)
 
     return assembledTreeNodes
   }
