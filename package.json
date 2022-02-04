@@ -17,7 +17,6 @@
     "typeorm": "^0.2.38"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.0",
     "@types/jest": "^27.4.0",
     "@types/lodash": "^4.14.178",
     "@types/node": "^14.17.32",
