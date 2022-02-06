@@ -1,6 +1,6 @@
 {
   "name": "typeorm-pg-adjacency-list-tree",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
