@@ -21,9 +21,13 @@ There are three decorators exported from this module: `Tree`, `TreeParent` and `
 
 ```typescript
 @Tree()
+@Entity()
 export class Node {
   @PrimaryGeneratedColumn()
   public id!: number
+
+  @Column()
+  public value!: number
 }
 ```
 
@@ -31,12 +35,16 @@ export class Node {
 
 ```typescript
 @Tree()
+@Entity()
 export class Node {
   @PrimaryGeneratedColumn()
   public id!: number
 
   @TreeParent()
   public parent!: Node
+
+  @Column()
+  public value!: number
 }
 ```
 
@@ -44,6 +52,7 @@ export class Node {
 
 ```typescript
 @Tree()
+@Entity()
 export class Node {
   @PrimaryGeneratedColumn()
   public id!: number
@@ -53,6 +62,9 @@ export class Node {
 
   @TreeChildren()
   public children!: Node[]
+
+  @Column()
+  public value!: number
 }
 ```
 
