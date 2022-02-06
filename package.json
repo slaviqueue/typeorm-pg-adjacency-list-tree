@@ -4,6 +4,11 @@
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "homepage": "https://github.com/slaviqueue/typeorm-pg-adjacency-list-tree",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slaviqueue/typeorm-pg-adjacency-list-tree"
+  },
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "test:watch": "./node_modules/.bin/jest --watch",
