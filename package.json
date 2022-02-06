@@ -4,8 +4,8 @@
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "./node_modules/.bin/jest",
+    "test:watch": "./node_modules/.bin/jest --watch"
   },
   "keywords": [
     "typeorm",
