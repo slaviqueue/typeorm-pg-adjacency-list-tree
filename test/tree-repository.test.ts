@@ -1,4 +1,3 @@
-import { map, omit } from 'lodash'
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from 'testcontainers'
 import {
   Column,
@@ -101,6 +100,39 @@ describe('TreeRepository', () => {
         },
         { id: 2, value: 2, parentId: null },
       ])
+    })
+  })
+
+  describe('#findDescendants()', () => {
+    it('returns root`s children and root as a flat list', async () => {
+      const root = await nodeRepo.findOneOrFail(1)
+      const descendants = await nodeRepo.findDescendants(root)
+
+      expect(new Set(descendants)).toEqual(
+        new Set([
+          { id: 1, value: 1, parentId: null },
+          { id: 3, value: 2, parentId: 1 },
+          { id: 4, value: 3, parentId: 1 },
+          { id: 5, value: 4, parentId: 4 },
+        ]),
+      )
+    })
+  })
+
+  describe('#findDescendantsTree()', () => {
+    it('returns root with children as a nested tree', async () => {
+      const root = await nodeRepo.findOneOrFail(1)
+      const tree = await nodeRepo.findDescendantsTree(root)
+
+      expect(tree).toEqual({
+        id: 1,
+        parentId: null,
+        value: 1,
+        children: [
+          { id: 3, parentId: 1, value: 2 },
+          { id: 4, parentId: 1, value: 3, children: [{ id: 5, parentId: 4, value: 4 }] },
+        ],
+      })
     })
   })
 })
