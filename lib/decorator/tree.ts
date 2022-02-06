@@ -1,9 +1,5 @@
 import { Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import {
-  childrenPropertyMetadataArgs,
-  isPgAdjacencyListTree,
-  parentPropertyMetadataArgs,
-} from '../constant/decorator-constants'
+import { childrenPropertyMetadataArgs, parentPropertyMetadataArgs } from '../constant/decorator-constants'
 
 function buildParentRelation(target: any, childrenPropertyKey: string) {
   // prettier-ignore
@@ -22,8 +18,6 @@ function addParentColumns(parentPropertyTarget: any, parentPropertyKey: string) 
 
 export function Tree() {
   return function (target: any) {
-    Reflect.defineMetadata(isPgAdjacencyListTree, true, target)
-
     const [parentPropertyTarget, parentPropertyKey] = Reflect.getMetadata(parentPropertyMetadataArgs, target)
     const [childrenPropertyTarget, childrenPropertyKey] = Reflect.getMetadata(childrenPropertyMetadataArgs, target)
 

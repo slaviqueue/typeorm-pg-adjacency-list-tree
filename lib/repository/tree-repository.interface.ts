@@ -1,3 +1,4 @@
+import { SelectQueryBuilder } from 'typeorm'
 import { FindTreeOptions } from 'typeorm/find-options/FindTreeOptions'
 
 export declare class ITreeRepository<Entity> {
@@ -22,15 +23,12 @@ export declare class ITreeRepository<Entity> {
    */
   public countDescendants(entity: Entity): Promise<number>
 
-  // Methods below are to be implemented
   /**
    * Creates a query builder used to get descendants of the entities in a tree.
    */
-  // public createDescendantsQueryBuilder(
-  //   alias: string,
-  //   closureTableAlias: string,
-  //   entity: Entity,
-  // ): SelectQueryBuilder<Entity>
+  public createDescendantsQueryBuilder(alias: string, entity: Entity): SelectQueryBuilder<Entity>
+
+  // Methods below are to be implemented
   // /**
   //  * Gets all parents (ancestors) of the given entity. Returns them all in a flat array.
   //  */
