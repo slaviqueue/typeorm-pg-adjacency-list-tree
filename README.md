@@ -20,11 +20,10 @@ export declare class ITreeRepository<Entity extends BaseTreeEntity> {
   public findRoots(options?: FindTreeOptions): Promise<Entity[]>
   public findDescendants(entity: Entity, options?: FindTreeOptions): Promise<Entity[]>
   public findDescendantsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
+  public countDescendants(entity: Entity): Promise<number>
+  public createDescendantsQueryBuilder(alias: string, closureTableAlias: string, entity: Entity)
 
   // Methods below are to be implemented
-
-  // public countDescendants(entity: Entity): Promise<number>
-  // public createDescendantsQueryBuilder( alias: string, closureTableAlias: string, entity: Entity,)
   // public findAncestors(entity: Entity, options?: FindTreeOptions): Promise<Entity[]>
   // public findAncestorsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
   // public countAncestors(entity: Entity): Promise<number>
