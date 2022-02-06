@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "./node_modules/.bin/jest",
-    "test:watch": "./node_modules/.bin/jest --watch"
+    "test:watch": "./node_modules/.bin/jest --watch",
+    "lint": "./node_modules/.bin/eslint . --fix",
+    "build": "tsc",
+    "prepublish": "tsc",
+    "prepublishOnly" : "npm test && npm run lint",
+    "prepare" : "npm run build"
   },
   "keywords": [
     "typeorm",
