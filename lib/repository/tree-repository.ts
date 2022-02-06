@@ -48,11 +48,9 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
     return count
   }
 
-  public createDescendantsQueryBuilder(alias: string, entity: Entity): SelectQueryBuilder<Entity> {
-    const queryBuilder = this.createQueryBuilder(alias).where(async (q) => {
-      const nodeIds = await this._getDescendantsIds(entity)
-      return q.where({ where: { id: In(nodeIds) } })
-    })
+  public async createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>> {
+    const ids = await this._getDescendantsIds(entity)
+    const queryBuilder = this.createQueryBuilder(alias).where({ id: In(ids) })
 
     return queryBuilder
   }
@@ -62,7 +60,6 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
     const rootId = rootAsTreeEntity.id
     const tablePath = this.metadata.tablePath
     const query = new FindTreeQuery({ tablePath, rootId, maxDepth }).build()
-
     const rawNodes = await this.manager.query(query)
     const ids = map(rawNodes, 'id')
 

@@ -26,7 +26,7 @@ export declare class ITreeRepository<Entity> {
   /**
    * Creates a query builder used to get descendants of the entities in a tree.
    */
-  public createDescendantsQueryBuilder(alias: string, entity: Entity): SelectQueryBuilder<Entity>
+  public createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>>
 
   // Methods below are to be implemented
   // /**

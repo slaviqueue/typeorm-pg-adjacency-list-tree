@@ -146,4 +146,14 @@ describe('TreeRepository', () => {
       expect(count).toEqual(4)
     })
   })
+
+  describe('#createDescendantsQueryBuilder()', () => {
+    it('returns the amount of descendants for specified entity', async () => {
+      const root = await nodeRepo.findOneOrFail(1)
+      const qb = await nodeRepo.createDescendantsQueryBuilder('node', root)
+      const nodesWithIds = await qb.select('id').execute()
+
+      expect(nodesWithIds).toEqual([{ id: 1 }, { id: 3 }, { id: 4 }, { id: 5 }])
+    })
+  })
 })
