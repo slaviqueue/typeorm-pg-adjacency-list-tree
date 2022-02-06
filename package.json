@@ -10,7 +10,8 @@
   "keywords": [
     "typeorm",
     "adjacency-list",
-    "postgres-adjacency-list"
+    "postgres-adjacency-list",
+    "typeorm-adjacency-list"
   ],
   "peerDependencies": {
     "reflect-metadata": "^0.1.13",
