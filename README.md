@@ -21,7 +21,10 @@ There are three decorators exported from this module: `Tree`, `TreeParent` and `
 
 ```typescript
 @Tree()
-export class Node {}
+export class Node {
+  @PrimaryGeneratedColumn()
+  public id!: number
+}
 ```
 
 `TreeParent` is used to identify class property which will hold entities parent:
@@ -29,6 +32,9 @@ export class Node {}
 ```typescript
 @Tree()
 export class Node {
+  @PrimaryGeneratedColumn()
+  public id!: number
+
   @TreeParent()
   public parent!: Node
 }
@@ -39,6 +45,9 @@ export class Node {
 ```typescript
 @Tree()
 export class Node {
+  @PrimaryGeneratedColumn()
+  public id!: number
+
   @TreeParent()
   public parent!: Node
 
