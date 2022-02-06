@@ -6,6 +6,7 @@ src="https://api.codeclimate.com/v1/badges/87bcd3913294f1f2aaf0/maintainability"
 /></a>
 ![tests](https://github.com/slaviqueue/typeorm-pg-adjacency-list-tree/workflows/test/badge.svg)
 ![npm version](https://badge.fury.io/js/typeorm-pg-adjacency-list-tree.svg)
+
 This library helps to manage trees that are structured as as adjacency list in
 postgres.
 
