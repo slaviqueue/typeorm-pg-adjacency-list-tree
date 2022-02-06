@@ -12,6 +12,12 @@ postgres.
 
 It partially implements public interface of `TreeRepository` from typeorm. Check [tree-repository.interface.ts](https://github.com/slaviqueue/typeorm-pg-adjacency-list-tree/blob/master/lib/repository/tree-repository.interface.ts)
 
+## Installation
+
+```bash
+npm i typeorm-pg-adjacency-list-tree
+```
+
 ## Quick start
 
 ### Decorators
