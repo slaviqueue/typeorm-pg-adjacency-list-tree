@@ -17,15 +17,15 @@ export declare class ITreeRepository<Entity> {
    * Gets all children (descendants) of the given entity. Returns them in a tree - nested into each other.
    */
   public findDescendantsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
+  /**
+   * Gets number of descendants of the entity.
+   */
+  public countDescendants(entity: Entity): Promise<number>
 
   // Methods below are to be implemented
-  // /**
-  //  * Gets number of descendants of the entity.
-  //  */
-  // public countDescendants(entity: Entity): Promise<number>
-  // /**
-  //  * Creates a query builder used to get descendants of the entities in a tree.
-  //  */
+  /**
+   * Creates a query builder used to get descendants of the entities in a tree.
+   */
   // public createDescendantsQueryBuilder(
   //   alias: string,
   //   closureTableAlias: string,

@@ -1,7 +1,9 @@
-import { keyBy, map } from 'lodash'
+import { first, get, map } from 'lodash'
 import { In, Repository } from 'typeorm'
 import { FindTreeOptions } from 'typeorm/find-options/FindTreeOptions'
 import { childrenPropertyMetadataArgs } from '../constant/decorator-constants'
+import { TreeAssembler } from './tree-assembler'
+import { FindTreeQuery } from './tree-query'
 import { ITreeRepository } from './tree-repository.interface'
 
 export interface IBaseTreeEntity {
@@ -22,25 +24,8 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
 
   public async findDescendants(root: Entity, options?: FindTreeOptions) {
     const rootAsTreeEntity = root as unknown as IBaseTreeEntity
-    const rawNodes = await this.manager.query(`
-      WITH RECURSIVE r AS (
-        SELECT id, 0 as depth
-        FROM ${this.metadata.tablePath}
-        WHERE id = ${rootAsTreeEntity.id}
-
-        UNION
-
-        SELECT ${this.metadata.tablePath}.id, r.depth + 1
-        FROM ${this.metadata.tablePath}
-          JOIN r
-              ON ${this.metadata.tablePath}.${this._parentColumnName} = r.id
-
-        ${options?.depth ? `WHERE depth < ${options.depth - 1}` : ``}
-      )
-
-      SELECT * FROM r;
-    `)
-
+    const query = new FindTreeQuery({ tablePath: this.metadata.tablePath, rootId: rootAsTreeEntity.id }).build()
+    const rawNodes = await this.manager.query(query)
     const nodeIds = map(rawNodes, 'id')
     const nodes = await this.find({ where: { id: In(nodeIds) }, relations: options?.relations })
 
@@ -55,33 +40,26 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
     return assembledTreeNodes
   }
 
+  public async countDescendants(entity: Entity): Promise<number> {
+    const rootAsTreeEntity = entity as unknown as IBaseTreeEntity
+    const query = new FindTreeQuery({
+      tablePath: this.metadata.tablePath,
+      rootId: rootAsTreeEntity.id,
+      selectCount: true,
+    }).build()
+
+    const result = await this.manager.query(query)
+    const count = Number(get(first(result), 'count'))
+
+    return count
+  }
+
   private _assembleOrgTreeNodes(nodes: Entity[], rootId: number) {
-    const idToNode = keyBy(nodes, 'id')
-
-    for (const node of nodes) {
-      const nodeAsAny = node as any
-      const parentIdAsAny = nodeAsAny.parentId as any
-
-      if (parentIdAsAny) {
-        const parentAsAny = idToNode[parentIdAsAny] as any
-
-        if (!parentAsAny[this._childrenPropertyName]) {
-          parentAsAny[this._childrenPropertyName] = []
-        }
-
-        parentAsAny[this._childrenPropertyName].push(node)
-      }
-    }
-
-    return idToNode[rootId]
+    return new TreeAssembler<Entity>({ childrenPropertyName: this._childrenPropertyName }).assemble(nodes, rootId)
   }
 
   private get _entity() {
     return this.target
-  }
-
-  private get _parentColumnName() {
-    return 'parent_id'
   }
 
   private get _childrenPropertyName() {

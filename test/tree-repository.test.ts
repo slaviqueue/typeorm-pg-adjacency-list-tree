@@ -135,4 +135,13 @@ describe('TreeRepository', () => {
       })
     })
   })
+
+  describe('#countDescendants()', () => {
+    it('returns the amount of descendants for specified entity', async () => {
+      const root = await nodeRepo.findOneOrFail(1)
+      const count = await nodeRepo.countDescendants(root)
+
+      expect(count).toEqual(4)
+    })
+  })
 })
