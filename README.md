@@ -20,14 +20,14 @@ There are three decorators exported from this module: `Tree`, `TreeParent` and `
 `Tree` is used to specify that decoratable entity is a tree.
 
 ```typescript
-@Tree
+@Tree()
 export class Node {}
 ```
 
 `TreeParent` is used to identify class property which will hold entities parent:
 
 ```typescript
-@Tree
+@Tree()
 export class Node {
   @TreeParent()
   public parent!: Node
@@ -37,7 +37,7 @@ export class Node {
 `TreeChildren` is used to identify class property which will hold children of current entity:
 
 ```typescript
-@Tree
+@Tree()
 export class Node {
   @TreeParent()
   public parent!: Node
