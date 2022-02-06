@@ -42,7 +42,6 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
     const tablePath = this.metadata.tablePath
     const rootId = rootAsTreeEntity.id
     const query = new FindTreeQuery({ tablePath, rootId, selectCount: true }).build()
-
     const result = await this.manager.query(query)
     const count = Number(get(first(result), 'count'))
 
