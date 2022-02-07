@@ -1,9 +1,9 @@
 {
   "name": "typeorm-pg-adjacency-list-tree",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "homepage": "https://github.com/slaviqueue/typeorm-pg-adjacency-list-tree",
   "repository": {
     "type": "git",
