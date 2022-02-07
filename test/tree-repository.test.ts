@@ -32,7 +32,7 @@ class Node {
 @EntityRepository(Node)
 class NodeRepository extends TreeRepository<Node> {}
 
-jest.setTimeout(20_000)
+jest.setTimeout(40_000)
 
 describe('TreeRepository', () => {
   let postgresContainer: StartedPostgreSqlContainer
