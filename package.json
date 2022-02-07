@@ -1,6 +1,6 @@
 {
   "name": "typeorm-pg-adjacency-list-tree",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A library that allows to use an adjacency list tree with typeorm and postgres",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,8 +15,8 @@
     "lint": "./node_modules/.bin/eslint . --fix",
     "build": "tsc",
     "prepublish": "tsc",
-    "prepublishOnly" : "npm test && npm run lint",
-    "prepare" : "npm run build"
+    "prepublishOnly": "npm test && npm run lint",
+    "prepare": "npm run build"
   },
   "keywords": [
     "typeorm",
