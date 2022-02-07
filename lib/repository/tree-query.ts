@@ -1,7 +1,7 @@
 type TreeQueryConfig = {
   maxDepth?: number
   selectCount?: boolean
-  tablePath: string
+  tableName: string
   rootId: number
 }
 
@@ -12,15 +12,15 @@ export class FindTreeQuery {
     return `
       WITH RECURSIVE r AS (
         SELECT ${this._getSelectFields()}
-        FROM ${this._config.tablePath}
+        FROM ${this._config.tableName} node
         WHERE id = ${this._config.rootId}
 
         UNION
 
         SELECT ${this._getSelectFields({ isRecursiveSelect: true })}
-        FROM ${this._config.tablePath}
+        FROM ${this._config.tableName} node
           JOIN r
-              ON ${this._config.tablePath}.parent_id = r.id
+              ON node.parent_id = r.id
 
         ${this._maybeLimitDepth()}
       )

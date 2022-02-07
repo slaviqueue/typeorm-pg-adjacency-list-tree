@@ -39,9 +39,9 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
 
   public async countDescendants(entity: Entity): Promise<number> {
     const rootAsTreeEntity = entity as unknown as IBaseTreeEntity
-    const tablePath = this.metadata.tablePath
+    const tableName = this.metadata.tableName
     const rootId = rootAsTreeEntity.id
-    const query = new FindTreeQuery({ tablePath, rootId, selectCount: true }).build()
+    const query = new FindTreeQuery({ tableName, rootId, selectCount: true }).build()
     const result = await this.manager.query(query)
     const count = Number(get(first(result), 'count'))
 
@@ -58,8 +58,8 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
   private async _getDescendantsIds(root: Entity, maxDepth?: number) {
     const rootAsTreeEntity = root as unknown as IBaseTreeEntity
     const rootId = rootAsTreeEntity.id
-    const tablePath = this.metadata.tablePath
-    const query = new FindTreeQuery({ tablePath, rootId, maxDepth }).build()
+    const tableName = this.metadata.tableName
+    const query = new FindTreeQuery({ tableName, rootId, maxDepth }).build()
     const rawNodes = await this.manager.query(query)
     const ids = map(rawNodes, 'id')
 
