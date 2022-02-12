@@ -2,8 +2,9 @@ import { first, get, map } from 'lodash'
 import { In, Repository, SelectQueryBuilder } from 'typeorm'
 import { FindTreeOptions } from 'typeorm/find-options/FindTreeOptions'
 import { childrenPropertyMetadataArgs } from '../constant/decorator-constants'
+import { NoRootParentError } from '../error/no-root-parent.error'
 import { TreeAssembler } from './tree-assembler'
-import { FindTreeQuery } from './tree-query'
+import { FindTreeQuery, RelationType } from './tree-query'
 import { ITreeRepository } from './tree-repository.interface'
 
 export interface IBaseTreeEntity {
@@ -23,14 +24,11 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
   }
 
   public async findDescendants(root: Entity, options?: FindTreeOptions) {
-    const nodeIds = await this._getDescendantsIds(root)
-    const nodes = await this.find({ where: { id: In(nodeIds) }, relations: options?.relations })
-
-    return nodes
+    return this._find('descendants', root, options)
   }
 
   public async findDescendantsTree(root: Entity, options?: FindTreeOptions) {
-    const nodes = await this.findDescendants(root, options)
+    const nodes = await this._find('descendants', root, options)
     const rootAsTreeEntity = root as unknown as IBaseTreeEntity
     const assembledTreeNodes = this._assembleOrgTreeNodes(nodes, rootAsTreeEntity.id)
 
@@ -38,28 +36,68 @@ export class TreeRepository<Entity> extends Repository<Entity> implements ITreeR
   }
 
   public async countDescendants(entity: Entity): Promise<number> {
+    return this._count('descendants', entity)
+  }
+
+  public async createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>> {
+    return this._createQueryBuilder('descendants', alias, entity)
+  }
+
+  public findAncestors(entity: Entity, options?: FindTreeOptions) {
+    return this._find('ancestors', entity, options)
+  }
+
+  public async findAncestorsTree(node: Entity, options?: FindTreeOptions) {
+    const ancestors = await this._find('ancestors', node, options)
+    const root = ancestors.find((node: any) => !node.parentId) as unknown as IBaseTreeEntity
+
+    if (!root) {
+      throw new NoRootParentError((node as any).id)
+    }
+
+    const assembledTreeNodes = this._assembleOrgTreeNodes(ancestors, root.id)
+
+    return assembledTreeNodes
+  }
+
+  public async countAncestors(entity: Entity): Promise<number> {
+    return this._count('ancestors', entity)
+  }
+
+  public async createAncestorsQueryBuilder(alias: string, entity: Entity) {
+    return this._createQueryBuilder('ancestors', alias, entity)
+  }
+
+  private async _find(relationType: RelationType, root: Entity, options?: FindTreeOptions) {
+    const nodeIds = await this._getIds(relationType, root)
+    const nodes = await this.find({ where: { id: In(nodeIds) }, relations: options?.relations })
+
+    return nodes
+  }
+
+  private async _count(relationType: RelationType, entity: Entity): Promise<number> {
     const rootAsTreeEntity = entity as unknown as IBaseTreeEntity
     const tableName = this.metadata.tableName
     const rootId = rootAsTreeEntity.id
-    const query = new FindTreeQuery({ tableName, rootId, selectCount: true }).build()
+    const query = new FindTreeQuery({ relationType: relationType, tableName, rootId, selectCount: true }).build()
     const result = await this.manager.query(query)
     const count = Number(get(first(result), 'count'))
 
     return count
   }
 
-  public async createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>> {
-    const ids = await this._getDescendantsIds(entity)
+  private async _createQueryBuilder(relationType: RelationType, alias: string, entity: Entity) {
+    const ids = await this._getIds(relationType, entity)
     const queryBuilder = this.createQueryBuilder(alias).where({ id: In(ids) })
 
     return queryBuilder
   }
 
-  private async _getDescendantsIds(root: Entity, maxDepth?: number) {
+  private async _getIds(relationType: RelationType, root: Entity, maxDepth?: number) {
     const rootAsTreeEntity = root as unknown as IBaseTreeEntity
     const rootId = rootAsTreeEntity.id
     const tableName = this.metadata.tableName
-    const query = new FindTreeQuery({ tableName, rootId, maxDepth }).build()
+    const query = new FindTreeQuery({ relationType: relationType, tableName, rootId, maxDepth }).build()
     const rawNodes = await this.manager.query(query)
     const ids = map(rawNodes, 'id')
 

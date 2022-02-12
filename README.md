@@ -132,3 +132,27 @@ public createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<Sel
 ```
 
 Creates a query builder used to get descendants of the entities in a tree.
+
+```typescript
+public findAncestors(entity: Entity, options?: FindTreeOptions): Promise<Entity[]>
+```
+
+Creates a query builder used to get descendants of the entities in a tree.
+
+```typescript
+public findAncestorsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
+```
+
+Gets all parents (ancestors) of the given entity. Returns them in a tree - nested into each other.
+
+```typescript
+public countAncestors(entity: Entity): Promise<number>
+```
+
+Gets number of ancestors of the entity.
+
+```typescript
+public createAncestorsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>>
+```
+
+Creates a query builder used to get ancestors of the entities in the tree.

@@ -148,12 +148,59 @@ describe('TreeRepository', () => {
   })
 
   describe('#createDescendantsQueryBuilder()', () => {
-    it('returns the amount of descendants for specified entity', async () => {
+    it('creates a query builder for node descendants', async () => {
       const root = await nodeRepo.findOneOrFail(1)
       const qb = await nodeRepo.createDescendantsQueryBuilder('node', root)
       const nodesWithIds = await qb.select('id').execute()
 
       expect(nodesWithIds).toEqual([{ id: 1 }, { id: 3 }, { id: 4 }, { id: 5 }])
+    })
+  })
+
+  describe('#findAncestors()', () => {
+    it("returns node's parents and a node as a flat list", async () => {
+      const node = await nodeRepo.findOneOrFail(3)
+      const ancestors = await nodeRepo.findAncestors(node)
+
+      expect(new Set(ancestors)).toEqual(
+        new Set([
+          { id: 1, value: 1, parentId: null },
+          { id: 3, value: 2, parentId: 1 },
+        ]),
+      )
+    })
+  })
+
+  describe('#findAncestorsTree()', () => {
+    it("returns node's ancestors as a tree", async () => {
+      const node = await nodeRepo.findOneOrFail(5)
+      const tree = await nodeRepo.findAncestorsTree(node)
+
+      expect(tree).toEqual({
+        id: 1,
+        parentId: null,
+        value: 1,
+        children: [{ id: 4, parentId: 1, value: 3, children: [{ id: 5, parentId: 4, value: 4 }] }],
+      })
+    })
+  })
+
+  describe('#countAncestors()', () => {
+    it('returns the amount of ancestors for specified entity', async () => {
+      const node = await nodeRepo.findOneOrFail(3)
+      const count = await nodeRepo.countAncestors(node)
+
+      expect(count).toEqual(2)
+    })
+  })
+
+  describe('#createAncestorsQueryBuilder()', () => {
+    it('creates a query builder for node ancestors', async () => {
+      const node = await nodeRepo.findOneOrFail(3)
+      const qb = await nodeRepo.createAncestorsQueryBuilder('node', node)
+      const nodesWithIds = await qb.select('id').execute()
+
+      expect(nodesWithIds).toEqual([{ id: 1 }, { id: 3 }])
     })
   })
 })

@@ -1,8 +1,13 @@
+import { InvalidTreeTypeError as InvalidRelationTypeError } from '../error/invalid-relation-type.error'
+
+export type RelationType = 'descendants' | 'ancestors'
+
 type TreeQueryConfig = {
-  maxDepth?: number
-  selectCount?: boolean
   tableName: string
   rootId: number
+  relationType: RelationType
+  selectCount?: boolean
+  maxDepth?: number
 }
 
 export class FindTreeQuery {
@@ -20,13 +25,25 @@ export class FindTreeQuery {
         SELECT ${this._getSelectFields({ isRecursiveSelect: true })}
         FROM ${this._config.tableName} node
           JOIN r
-              ON node.parent_id = r.id
+              ON ${this._getJoinCondition()}
 
         ${this._maybeLimitDepth()}
       )
 
       ${this._getFinalSelect()};
     `
+  }
+
+  private _getJoinCondition() {
+    if (this._config.relationType === 'descendants') {
+      return 'node.parent_id = r.id'
+    }
+
+    if (this._config.relationType === 'ancestors') {
+      return 'node.id = r.parent_id'
+    }
+
+    throw new InvalidRelationTypeError(this._config.relationType)
   }
 
   private _maybeLimitDepth() {
@@ -38,7 +55,7 @@ export class FindTreeQuery {
   }
 
   private _getSelectFields({ isRecursiveSelect }: { isRecursiveSelect?: boolean } = {}) {
-    const defaultFields = ['node.id']
+    const defaultFields = ['node.id', 'node.parent_id']
 
     if (this._config.maxDepth) {
       if (isRecursiveSelect) {

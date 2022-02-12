@@ -29,24 +29,20 @@ export declare class ITreeRepository<Entity> {
   public createDescendantsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>>
 
   // Methods below are to be implemented
-  // /**
-  //  * Gets all parents (ancestors) of the given entity. Returns them all in a flat array.
-  //  */
-  // public findAncestors(entity: Entity, options?: FindTreeOptions): Promise<Entity[]>
-  // /**
-  //  * Gets all parents (ancestors) of the given entity. Returns them in a tree - nested into each other.
-  //  */
-  // public findAncestorsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
-  // /**
-  //  * Gets number of ancestors of the entity.
-  //  */
-  // public countAncestors(entity: Entity): Promise<number>
-  // /**
-  //  * Creates a query builder used to get ancestors of the entities in the tree.
-  //  */
-  // public createAncestorsQueryBuilder(
-  //   alias: string,
-  //   closureTableAlias: string,
-  //   entity: Entity,
-  // ): SelectQueryBuilder<Entity>
+  /**
+   * Gets all parents (ancestors) of the given entity. Returns them all in a flat array.
+   */
+  public findAncestors(entity: Entity, options?: FindTreeOptions): Promise<Entity[]>
+  /**
+   * Gets all parents (ancestors) of the given entity. Returns them in a tree - nested into each other.
+   */
+  public findAncestorsTree(entity: Entity, options?: FindTreeOptions): Promise<Entity>
+  /**
+   * Gets number of ancestors of the entity.
+   */
+  public countAncestors(entity: Entity): Promise<number>
+  /**
+   * Creates a query builder used to get ancestors of the entities in the tree.
+   */
+  public createAncestorsQueryBuilder(alias: string, entity: Entity): Promise<SelectQueryBuilder<Entity>>
 }
