@@ -39,7 +39,7 @@ describe('TreeRepository', () => {
     { value: 2 },
   ]
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     postgresContainer = await new PostgreSqlContainer()
       .withExposedPorts(5432)
       .withUsername('postgres')
