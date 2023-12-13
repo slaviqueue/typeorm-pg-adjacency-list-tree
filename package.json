@@ -14,7 +14,6 @@
     "test:watch": "./node_modules/.bin/jest --watch",
     "lint": "./node_modules/.bin/eslint . --fix",
     "build": "tsc",
-    "prepublish": "tsc",
     "prepublishOnly": "npm test && npm run lint",
     "prepare": "npm run build"
   },
