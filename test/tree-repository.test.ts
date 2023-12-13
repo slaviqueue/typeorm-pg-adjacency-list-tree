@@ -1,17 +1,10 @@
+import { find } from 'lodash'
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from 'testcontainers'
-import {
-  Column,
-  Connection,
-  createConnection,
-  Entity,
-  EntityRepository,
-  getConnection,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, DataSource, Entity, LessThan, PrimaryGeneratedColumn } from 'typeorm'
 import { Tree } from '../lib/decorator/tree'
 import { TreeChildren } from '../lib/decorator/tree-children'
 import { TreeParent } from '../lib/decorator/tree-parent'
-import { TreeRepository } from '../lib/repository/tree-repository'
+import { extendTreeRepository, TreeRepository } from '../lib/repository/tree-repository'
 
 @Tree()
 @Entity()
@@ -29,15 +22,14 @@ class Node {
   public value!: number
 }
 
-@EntityRepository(Node)
-class NodeRepository extends TreeRepository<Node> {}
+type NodeRepository = TreeRepository<Node>
 
 jest.setTimeout(40_000)
 
 describe('TreeRepository', () => {
   let postgresContainer: StartedPostgreSqlContainer
   let nodeRepo: NodeRepository
-  let connection: Connection
+  let dataSource: DataSource
 
   const trees = [
     {
@@ -47,7 +39,7 @@ describe('TreeRepository', () => {
     { value: 2 },
   ]
 
-  beforeAll(async function () {
+  beforeAll(async function() {
     postgresContainer = await new PostgreSqlContainer()
       .withExposedPorts(5432)
       .withUsername('postgres')
@@ -55,7 +47,7 @@ describe('TreeRepository', () => {
       .withDatabase('postgres')
       .start()
 
-    await createConnection({
+    dataSource = new DataSource({
       type: 'postgres',
       host: 'localhost',
       port: postgresContainer.getMappedPort(5432),
@@ -64,15 +56,15 @@ describe('TreeRepository', () => {
       entities: [Node],
     })
 
-    connection = getConnection()
-    nodeRepo = connection.getCustomRepository(NodeRepository)
+    await dataSource.initialize()
+    nodeRepo = extendTreeRepository(dataSource.getRepository(Node))
 
-    await connection.manager.query('create table node (id serial primary key, value integer, parent_id integer)')
+    await dataSource.manager.query('create table node (id serial primary key, value integer, parent_id integer)')
     await nodeRepo.save(trees)
   })
 
   afterAll(async () => {
-    await connection.close()
+    await dataSource.destroy()
     await postgresContainer.stop()
   })
 
@@ -107,7 +99,7 @@ describe('TreeRepository', () => {
 
   describe('#findDescendants()', () => {
     it('returns root`s children and root as a flat list', async () => {
-      const root = await nodeRepo.findOneOrFail(1)
+      const root = await nodeRepo.findOneOrFail({ where: { id: 1 } })
       const descendants = await nodeRepo.findDescendants(root)
 
       expect(new Set(descendants)).toEqual(
@@ -123,7 +115,7 @@ describe('TreeRepository', () => {
 
   describe('#findDescendantsTree()', () => {
     it('returns root with children as a nested tree', async () => {
-      const root = await nodeRepo.findOneOrFail(1)
+      const root = await nodeRepo.findOneOrFail({ where: { id: 1 } })
       const tree = await nodeRepo.findDescendantsTree(root)
 
       expect(tree).toEqual({
@@ -140,7 +132,7 @@ describe('TreeRepository', () => {
 
   describe('#countDescendants()', () => {
     it('returns the amount of descendants for specified entity', async () => {
-      const root = await nodeRepo.findOneOrFail(1)
+      const root = await nodeRepo.findOneOrFail({ where: { id: 1 } })
       const count = await nodeRepo.countDescendants(root)
 
       expect(count).toEqual(4)
@@ -149,7 +141,7 @@ describe('TreeRepository', () => {
 
   describe('#createDescendantsQueryBuilder()', () => {
     it('creates a query builder for node descendants', async () => {
-      const root = await nodeRepo.findOneOrFail(1)
+      const root = await nodeRepo.findOneOrFail({ where: { id: 1 } })
       const qb = await nodeRepo.createDescendantsQueryBuilder('node', root)
       const nodesWithIds = await qb.select('id').execute()
 
@@ -159,7 +151,7 @@ describe('TreeRepository', () => {
 
   describe('#findAncestors()', () => {
     it("returns node's parents and a node as a flat list", async () => {
-      const node = await nodeRepo.findOneOrFail(3)
+      const node = await nodeRepo.findOneOrFail({ where: { id: 3 } })
       const ancestors = await nodeRepo.findAncestors(node)
 
       expect(new Set(ancestors)).toEqual(
@@ -173,7 +165,7 @@ describe('TreeRepository', () => {
 
   describe('#findAncestorsTree()', () => {
     it("returns node's ancestors as a tree", async () => {
-      const node = await nodeRepo.findOneOrFail(5)
+      const node = await nodeRepo.findOneOrFail({ where: { id: 5 } })
       const tree = await nodeRepo.findAncestorsTree(node)
 
       expect(tree).toEqual({
@@ -187,7 +179,7 @@ describe('TreeRepository', () => {
 
   describe('#countAncestors()', () => {
     it('returns the amount of ancestors for specified entity', async () => {
-      const node = await nodeRepo.findOneOrFail(3)
+      const node = await nodeRepo.findOneOrFail({ where: { id: 3 } })
       const count = await nodeRepo.countAncestors(node)
 
       expect(count).toEqual(2)
@@ -196,11 +188,27 @@ describe('TreeRepository', () => {
 
   describe('#createAncestorsQueryBuilder()', () => {
     it('creates a query builder for node ancestors', async () => {
-      const node = await nodeRepo.findOneOrFail(3)
+      const node = await nodeRepo.findOneOrFail({ where: { id: 3 } })
       const qb = await nodeRepo.createAncestorsQueryBuilder('node', node)
       const nodesWithIds = await qb.select('id').execute()
 
       expect(nodesWithIds).toEqual([{ id: 1 }, { id: 3 }])
+    })
+  })
+
+  describe('Suppose we want to extend the tree repo somehow', () => {
+    it('should work', async () => {
+      const nodeRepoWithAdditionalMethods = nodeRepo.extend({
+        getWhereIdIsLessThan(n: number) {
+          return this.find({ where: { id: LessThan(n) } })
+        },
+      })
+
+      const nodes = await nodeRepoWithAdditionalMethods.getWhereIdIsLessThan(3)
+
+      expect(nodes).toHaveLength(2)
+      expect(find(nodes, { id: 1 })).toBeTruthy()
+      expect(find(nodes, { id: 2 })).toBeTruthy()
     })
   })
 })
